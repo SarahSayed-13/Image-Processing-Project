@@ -6,12 +6,12 @@ Assignment: Assignment 1 - Part 1
 Program Name: Image Processing Program
 
 Team Members:
-1. Sarah Sayed Hafez Mohamed     - ID: [20250911] - (Filter 1: Grayscale, Filter 5: Flip)
-2. Mariam Helmy                  - ID: [20251391] - (Filter 2: Black & White, Filter 6: Rotate)
+1. Sarah Sayed Hafez Mohamed     - ID: [20250911]   - (Filter 1: Grayscale, Filter 5: Flip)
+2. Mariam Helmy Mahmoud Helmy    - ID: [20251391]   - (Filter 2: Black & White, Filter 6: Rotate)
 3. Menna Tamer Hassan Said       - ID: [20251431]   - (Filter 3: Invert, Filter 7: Darken/Lighten)
 4. Nour Osama Ali Ibrahim Rakha  - ID: [20251459]   - (Filter 4: Frame, Filter 8: Resize)
 
-Section: S[ 15 ]
+Section: S[ 15 || 16 ]
 ================================================================================
 */
 
@@ -25,6 +25,7 @@ Section: S[ 15 ]
 using namespace std;
 enum class EnFilterOptions {
     GrayScale = 1,
+    BlackAndWhite=2,
     Exit = 17
 };
 // Function for loading Images
@@ -64,6 +65,32 @@ void GrayScaleFlow() {
     GrayScale(userImage);
     SaveImage(userImage, "Enter image filename to save: ");
 }
+// Filter 2 :Black and White Filter
+void BlackAndWhiteImageFilter(Image &UserImage)
+{
+    for (int i=0;i<UserImage.width;i++) {
+        for (int j=0;j<UserImage.height;j++) {
+            double Brightness=0;
+            for (int k=0;k<3;k++) {
+                Brightness+=UserImage(  i,j,k);
+            }
+            Brightness=Brightness/3;
+            if (Brightness<127.5) { // 127.5 --> MidPoint between 0 and 255
+                UserImage(i,j,0)=UserImage(i,j,1)=UserImage(i,j,2)=0;
+            }
+            else {
+                UserImage(i,j,0)=UserImage(i,j,1)=UserImage(i,j,2)=255;
+            }
+        }
+    }
+}
+// Flow BlackAndWhite //
+void BlackAndWhiteFlow() {
+    Image UserImage;
+    LoadImage(UserImage, "Enter image filename for Black and White : ");
+    BlackAndWhiteImageFilter(UserImage);
+    SaveImage(UserImage, "Enter image filename to save: ");
+}
 void ExitProgram() {
     cout << "=====================\n";
     cout << "    Program Ended    \n";
@@ -79,12 +106,22 @@ void FiltersMenu();
 void Start(EnFilterOptions choice) {
     switch (choice) {
         case EnFilterOptions::GrayScale:
+        {
             GrayScaleFlow();
             FiltersMenu();
             break;
+        }
+        case EnFilterOptions::BlackAndWhite:
+        {
+            BlackAndWhiteFlow();
+            FiltersMenu();
+            break;
+        }
         case EnFilterOptions::Exit:
+        {
             ExitProgram();
             return;
+        }
         default:
             cout << "\nInvalid Choice! Try again.\n\n";
             FiltersMenu();
@@ -94,6 +131,7 @@ void Start(EnFilterOptions choice) {
 void FiltersMenu() {
     cout << "=================================\n";
     cout << "\t [1]  GrayScale Filter\n";
+    cout<<  "\t [2]  Black and White Filter\n";
     cout << "\t [17] Exit\n";
     cout << "=================================\n";
     Start(GetChoice());

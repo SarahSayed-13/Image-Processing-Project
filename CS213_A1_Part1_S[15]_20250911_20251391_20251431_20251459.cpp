@@ -26,6 +26,7 @@ using namespace std;
 enum class EnFilterOptions {
     GrayScale = 1,
     BlackAndWhite=2,
+     Invert=3,
     Exit = 17
 };
 // Function for loading Images
@@ -91,6 +92,24 @@ void BlackAndWhiteFlow() {
     BlackAndWhiteImageFilter(UserImage);
     SaveImage(UserImage, "Enter image filename to save: ");
 }
+
+//Filter 3: Invert //
+void Invert(Image& image)
+{
+    for (int i=0;i<image.width;++i) {  //width-->columns
+        for (int j=0;j<image.height;++j) { //height-->rows
+            for (int k=0;k<3;++k) { //3-->channels
+                image(i,j,k)= 255 - image(i, j, k);
+            } } }}
+
+// Invert Flow  //
+void InvertFlow() {
+    Image UserImage;
+    LoadImage(UserImage, "Enter image filename for Invert : ");
+   Invert(UserImage);
+    SaveImage(UserImage, "Enter image filename to save: ");
+}
+
 void ExitProgram() {
     cout << "=====================\n";
     cout << "    Program Ended    \n";
@@ -117,6 +136,12 @@ void Start(EnFilterOptions choice) {
             FiltersMenu();
             break;
         }
+        case EnFilterOptions::Invert:
+       {
+       InvertFlow();
+       FiltersMenu();
+      break;
+      }
         case EnFilterOptions::Exit:
         {
             ExitProgram();
@@ -132,6 +157,7 @@ void FiltersMenu() {
     cout << "=================================\n";
     cout << "\t [1]  GrayScale Filter\n";
     cout<<  "\t [2]  Black and White Filter\n";
+    cout<<  "\t [3]  Invert Filter\n";
     cout << "\t [17] Exit\n";
     cout << "=================================\n";
     Start(GetChoice());

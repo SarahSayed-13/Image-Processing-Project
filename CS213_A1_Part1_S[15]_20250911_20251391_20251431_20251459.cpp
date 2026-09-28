@@ -25,9 +25,10 @@ Section: S[ 15 || 16 ]
 using namespace std;
 enum class EnFilterOptions {
     GrayScale = 1,
-    BlackAndWhite=2,
+     BlackAndWhite=2,
      Invert=3,
-    Exit = 17
+	 FrameImage=4,
+     Exit = 17
 };
 // Function for loading Images
 void LoadImage(Image& img, string prompt = "Enter image filename: ") {
@@ -45,9 +46,12 @@ void SaveImage(Image& img, string prompt = "Enter image filename to save: ") {
     cout << "Image saved successfully as " << filename << ".\n\n";
 }
 // Filter 1: Grayscale // 
-void GrayScale(Image& image) {
-    for (int y = 0; y < image.height; ++y) {
-        for (int x = 0; x < image.width; ++x) {
+void GrayScale(Image& image)
+{
+    for (int y = 0; y < image.height; ++y) 
+	{
+        for (int x = 0; x < image.width; ++x) 
+		{
             int red   = image(x, y, 0);
             int green = image(x, y, 1);
             int blue  = image(x, y, 2);
@@ -60,7 +64,8 @@ void GrayScale(Image& image) {
     }
 }
 // Flow GrayScale //
-void GrayScaleFlow() {
+void GrayScaleFlow()
+{
     Image userImage;
     LoadImage(userImage, "Enter image filename for GrayScale: ");
     GrayScale(userImage);
@@ -86,7 +91,8 @@ void BlackAndWhiteImageFilter(Image &UserImage)
     }
 }
 // Flow BlackAndWhite //
-void BlackAndWhiteFlow() {
+void BlackAndWhiteFlow()
+{
     Image UserImage;
     LoadImage(UserImage, "Enter image filename for Black and White : ");
     BlackAndWhiteImageFilter(UserImage);
@@ -108,6 +114,211 @@ void InvertFlow() {
     LoadImage(UserImage, "Enter image filename for Invert : ");
    Invert(UserImage);
     SaveImage(UserImage, "Enter image filename to save: ");
+}
+ 
+struct FrameData
+{
+	int FrameWidth;
+	int FrameHeight;
+	int Red;
+	int Green;
+	int Blue;
+};
+FrameData ReadData()
+{
+	FrameData DataOfFrame;
+	do
+	{
+		cout << "Please, Enter the Width of Frame\n";
+		cin >> DataOfFrame.FrameWidth;
+		cout << "Please, Enter The Height of Frame\n";
+		cin >> DataOfFrame.FrameHeight;
+	} while (DataOfFrame.FrameWidth <= 0 || DataOfFrame.FrameHeight <= 0);
+
+	do
+	{
+		cout << "PLease,Choose The color of the Frame from '0' to '255'\n";
+		cout << "Enter the value of Red\n";
+		cin >> DataOfFrame.Red;
+		cout << "Enter the value of Green\n";
+		cin >> DataOfFrame.Green;
+		cout << "Enter the value of Blue\n";
+		cin >> DataOfFrame.Blue;
+	} while ((DataOfFrame.Red < 0 || DataOfFrame.Red>255) || (DataOfFrame.Green < 0 || DataOfFrame.Green>255) || (DataOfFrame.Blue < 0 || DataOfFrame.Blue>255));
+
+	return DataOfFrame;
+}
+enum StyleOfFrame { SimpleFrameChoice = 1, DoubleBorderChoice = 2, DoubleBorderWithCornerPatternsChoice = 3 };
+enum DoubleFrame { Inside = 1, Outside = 2 };
+void SimpleFrame(Image& image, FrameData DataOfFrame)
+{
+	int NewWidth = image.width + 2 * DataOfFrame.FrameWidth;
+	int NewHeight = image.height + 2 * DataOfFrame.FrameHeight;
+	Image NewImage(NewWidth, NewHeight);
+	for (int i = 0; i < NewImage.width; i++)
+	{
+		for (int j = 0; j < NewImage.height; j++)
+		{
+			if (i < DataOfFrame.FrameWidth || i >= NewWidth - DataOfFrame.FrameWidth || j < DataOfFrame.FrameHeight || j >= NewHeight - DataOfFrame.FrameHeight)
+			{
+				NewImage.setPixel(i, j, 0, DataOfFrame.Red);
+				NewImage.setPixel(i, j, 1, DataOfFrame.Green);
+				NewImage.setPixel(i, j, 2, DataOfFrame.Blue);
+			}
+			else
+			{
+				for (int c = 0;c < 3;c++)
+				{
+					NewImage.setPixel(i, j, c, image.getPixel(i - DataOfFrame.FrameWidth, j - DataOfFrame.FrameHeight, c));
+				}
+			}
+		}
+	}
+	image = NewImage;
+}
+FrameData HelperFunGetSecondFrame()
+{
+	FrameData SecondFrame;
+	int Red, Green, Blue;
+	do
+	{
+		cout << "Enter The Color of inner frame from '0' to '255'\n";
+		cout << "For Red: \n";
+		cin >> SecondFrame.Red;
+		cout << "For Green: \n";
+		cin >> SecondFrame.Green;
+		cout << "For Blue: \n";
+		cin >> SecondFrame.Blue;
+
+	} while ((SecondFrame.Red < 0 || SecondFrame.Red>255) || (SecondFrame.Green < 0 || SecondFrame.Green>255) || (SecondFrame.Blue < 0 || SecondFrame.Blue>255));
+	return SecondFrame;
+}
+void InnerFrame(Image& image, FrameData DataOfFrame, FrameData SecondFrame, int Gap, int Thickness = 3)
+{
+
+	int StartX = DataOfFrame.FrameWidth + Gap;
+	int EndX = image.width - DataOfFrame.FrameWidth - Gap;
+	int StartY = DataOfFrame.FrameHeight + Gap;
+	int EndY = image.height - DataOfFrame.FrameHeight - Gap;
+	for (int i = StartX; i <= EndX; i++)
+	{
+		for (int t = 0; t < Thickness; t++)
+		{
+			image.setPixel(i, StartY + t, 0, SecondFrame.Red);
+			image.setPixel(i, StartY + t, 1, SecondFrame.Green);
+			image.setPixel(i, StartY + t, 2, SecondFrame.Blue);
+
+			image.setPixel(i, EndY - t, 0, SecondFrame.Red);
+			image.setPixel(i, EndY - t, 1, SecondFrame.Green);
+			image.setPixel(i, EndY - t, 2, SecondFrame.Blue);
+
+
+		}
+	}
+	for (int j = StartY; j <= EndY; j++)
+	{
+		for (int t = 0; t < Thickness; t++)
+		{
+			image.setPixel(t + StartX, j, 0, SecondFrame.Red);
+			image.setPixel(t + StartX, j, 1, SecondFrame.Green);
+			image.setPixel(t + StartX, j, 2, SecondFrame.Blue);
+
+			image.setPixel(EndX - t, j, 0, SecondFrame.Red);
+			image.setPixel(EndX - t, j, 1, SecondFrame.Green);
+			image.setPixel(EndX - t, j, 2, SecondFrame.Blue);
+
+		}
+	}
+
+}
+
+
+void DoubleBorder(Image& image)
+{
+	FrameData DataOfFrame = ReadData();
+	SimpleFrame(image, DataOfFrame);
+	int Position;
+	do
+	{
+		cout << "Please, Where do you want the frame to be ? Inside[1] , Outsid[2]\n";
+		cin >> Position;
+	} while (Position != 1 && Position != 2);
+	DoubleFrame position = DoubleFrame(Position);
+	if (position == Outside)
+	{
+		DataOfFrame = ReadData();
+		SimpleFrame(image, DataOfFrame);
+	}
+	else if (position == Inside)
+	{
+		int Gap = 5;
+
+		FrameData SecondFrame = HelperFunGetSecondFrame();
+		InnerFrame(image, DataOfFrame, SecondFrame, Gap);
+
+
+	}
+}
+void DoubleBorderWithCornerPatterns(Image& image)
+{
+	FrameData DataOfFrame = ReadData();
+	SimpleFrame(image, DataOfFrame);
+	FrameData SecondFrame = HelperFunGetSecondFrame();
+	int Gap = 0;
+	int Thickness = 3;
+	InnerFrame(image, DataOfFrame, SecondFrame, Gap, Thickness);
+	int CornerSize = 15;
+	for (int i = 0; i < CornerSize; i++)
+	{
+		for (int j = 0; j < CornerSize; j++)
+		{
+			for (int c = 0; c < 3; c++)
+			{
+				image.setPixel(i + DataOfFrame.FrameWidth + Thickness, j + DataOfFrame.FrameHeight + Thickness, c, 255);
+				image.setPixel(image.width - DataOfFrame.FrameWidth - Thickness - CornerSize + i, j + DataOfFrame.FrameHeight + Thickness, c, 255);
+				image.setPixel(image.width - DataOfFrame.FrameWidth - Thickness - CornerSize + i, image.height - DataOfFrame.FrameHeight - Thickness - CornerSize + j, c, 255);
+				image.setPixel(i + DataOfFrame.FrameWidth + Thickness, image.height - DataOfFrame.FrameHeight - Thickness - CornerSize + j, c, 255);
+
+			}
+		}
+	}
+
+}
+
+
+void FrameImage(Image& image)
+{
+	int TypeOfStyle;
+	do
+	{
+		cout << "What Style do You want in this Frame? SimpleFrame[1] , DoubleBorder[2] , DoubleBorderWithCornerPatterns[3]\n";
+		cin >> TypeOfStyle;
+	} while (TypeOfStyle <= 0 || TypeOfStyle > 3);
+
+	StyleOfFrame StyleFrame = StyleOfFrame(TypeOfStyle);
+
+	switch (StyleFrame)
+	{
+	case SimpleFrameChoice:
+	{
+		FrameData DataOfFrame = ReadData();
+		SimpleFrame(image, DataOfFrame);
+		break;
+	}
+	case DoubleBorderChoice:
+		DoubleBorder(image);
+		break;
+	case DoubleBorderWithCornerPatternsChoice:
+		DoubleBorderWithCornerPatterns(image);
+		break;
+	}
+}
+void FrameImageFlow()
+{
+	Image UserImage;
+	LoadImage(UserImage, "Enter Image Filename For FrameImage : ");
+	FrameImage(UserImage);
+	SaveImage(UserImage, "Enter Image Filename To Save: ");
 }
 
 void ExitProgram() {
@@ -137,11 +348,17 @@ void Start(EnFilterOptions choice) {
             break;
         }
         case EnFilterOptions::Invert:
-       {
-       InvertFlow();
-       FiltersMenu();
-      break;
-      }
+        {
+         InvertFlow();
+         FiltersMenu();
+         break;
+        }
+		case EnFilterOptions::FrameImage:
+		{
+			FrameImageFlow();
+			FiltersMenu();
+			break;
+		}
         case EnFilterOptions::Exit:
         {
             ExitProgram();
@@ -158,6 +375,7 @@ void FiltersMenu() {
     cout << "\t [1]  GrayScale Filter\n";
     cout<<  "\t [2]  Black and White Filter\n";
     cout<<  "\t [3]  Invert Filter\n";
+	cout << "\t [4]  Frame Image Filter\n";
     cout << "\t [17] Exit\n";
     cout << "=================================\n";
     Start(GetChoice());

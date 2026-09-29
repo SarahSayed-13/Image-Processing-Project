@@ -25,11 +25,12 @@ Section: S[ 15 || 16 ]
 using namespace std;
 enum class EnFilterOptions {
     GrayScale = 1,
-     BlackAndWhite=2,
+     BlackAndWhite = 2,
      Invert=3,
 	 FrameImage=4,
 	 FlipImage=5,
-     Exit = 17
+	 Rotate = 6,
+     Exit = 9 
 };
 // Function for loading Images
 void LoadImage(Image& img, string prompt = "Enter image filename: ") {
@@ -366,6 +367,60 @@ void FlipImageFlow() {
     ApplyFlipFilter(userImage);
     SaveImage(userImage, "Enter image filename to save: ");
 }
+// Rotate Filter
+void RotateImageFilter(Image &UserImage) {
+    int RotationDegree=0;
+    while (true) {
+        cout<<"Choose Rotation Degree (90,180,270) :  "<<endl;
+        cin>>RotationDegree;
+        if (RotationDegree==90 || RotationDegree==180 || RotationDegree==270) {
+            break;
+        }
+        else {
+            cout<<"Invalid Input, try again."<<endl;
+        }
+    }
+    if (RotationDegree==90) {
+        Image RotateImage90(UserImage.height,UserImage.width);
+        for (int i=0;i<UserImage.width;i++) {
+            for (int j=0;j<UserImage.height;j++) {
+                RotateImage90(RotateImage90.width-j-1,i,0)=UserImage(i,j,0);
+                RotateImage90(RotateImage90.width-j-1,i,1)=UserImage(i,j,1);
+                RotateImage90(RotateImage90.width-j-1,i,2)=UserImage(i,j,2);
+            }
+        }
+        UserImage=RotateImage90;
+    }
+    else if (RotationDegree==180) {
+        Image RotateImage180(UserImage.width,UserImage.height);
+        for (int i=0;i<UserImage.width;i++) {
+            for (int j=0;j<UserImage.height;j++) {
+                RotateImage180(RotateImage180.width-i-1,RotateImage180.height-j-1,0)=UserImage(i,j,0);
+                RotateImage180(RotateImage180.width-i-1,RotateImage180.height-j-1,1)=UserImage(i,j,1);
+                RotateImage180(RotateImage180.width-i-1,RotateImage180.height-j-1,2)=UserImage(i,j,2);
+            }
+        }
+        UserImage=RotateImage180;
+    }
+    else if (RotationDegree==270) {
+        Image RotateImage270(UserImage.height,UserImage.width);
+        for (int i=0;i<UserImage.width;i++) {
+            for (int j=0;j<UserImage.height;j++) {
+                RotateImage270(j,RotateImage270.height-i-1,0)=UserImage(i,j,0);
+                RotateImage270(j,RotateImage270.height-i-1,1)=UserImage(i,j,1);
+                RotateImage270(j,RotateImage270.height-i-1,2)=UserImage(i,j,2);
+            }
+        }
+        UserImage=RotateImage270;
+    }
+}
+// Flow Rotate Filter //
+void RotateFlow() {
+    Image UserImage;
+    LoadImage(UserImage, "Enter image filename for Rotating : ");
+    RotateImageFilter(UserImage);
+    SaveImage(UserImage, "Enter image filename to save: ");
+}
 void ExitProgram() {
     cout << "=====================\n";
     cout << "    Program Ended    \n";
@@ -415,6 +470,12 @@ void Start(EnFilterOptions choice) {
             ExitProgram();
             return;
         }
+		case EnFilterOptions::Rotate:
+        {
+            RotateFlow();
+            FiltersMenu();
+            break;
+        }
         default:
             cout << "\nInvalid Choice! Try again.\n\n";
             FiltersMenu();
@@ -428,7 +489,8 @@ void FiltersMenu() {
     cout<<  "\t [3]  Invert Filter\n";
 	cout << "\t [4]  Frame Image Filter\n";
 	cout << "\t [5]  Flip Image Filter\n";
-    cout << "\t [17] Exit\n";
+	cout<<  "\t [6]  Rotate Filter\n";
+    cout << "\t [9]  Exit\n";
     cout << "=================================\n";
     Start(GetChoice());
 }

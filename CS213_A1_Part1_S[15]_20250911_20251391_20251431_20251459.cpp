@@ -28,6 +28,7 @@ enum class EnFilterOptions {
      BlackAndWhite=2,
      Invert=3,
 	 FrameImage=4,
+	 FlipImage=5,
      Exit = 17
 };
 // Function for loading Images
@@ -320,7 +321,51 @@ void FrameImageFlow()
 	FrameImage(UserImage);
 	SaveImage(UserImage, "Enter Image Filename To Save: ");
 }
-
+// Filter 5: Flip (Horizontal / Vertical) //
+void FlipHorizontal(Image& image) {
+    for (int y = 0; y < image.height; ++y) {
+        for (int x = 0; x < image.width / 2; ++x) {
+            int oppositeX = image.width - 1 - x;
+            for (int c = 0; c < image.channels; ++c) {
+                swap(image(x, y, c), image(oppositeX, y, c));
+            }
+        }
+    }
+}
+void FlipVertical(Image& image) {
+    for (int y = 0; y < image.height / 2; ++y) {
+        int oppositeY = image.height - 1 - y;
+        for (int x = 0; x < image.width; ++x) {
+            for (int c = 0; c < image.channels; ++c) {
+                swap(image(x, y, c), image(x, oppositeY, c));
+            }
+        }
+    }
+}
+void ApplyFlipFilter(Image& image) {
+    int choice = 0;
+    cout << "\nChoose a flip option:\n";
+    cout << "1. Flip Horizontally\n";
+    cout << "2. Flip Vertically\n";
+    cout << "Enter your choice (1 or 2): ";
+    cin >> choice;
+    while (choice != 1 && choice != 2) {
+        cout << "Invalid choice. Please enter 1 or 2: ";
+        cin >> choice;
+    }
+    if (choice == 1) {
+        FlipHorizontal(image);
+    } else {
+        FlipVertical(image);
+    }
+}
+// Flow Flip Image //
+void FlipImageFlow() {
+    Image userImage;
+    LoadImage(userImage, "Enter image filename to Flip: ");
+    ApplyFlipFilter(userImage);
+    SaveImage(userImage, "Enter image filename to save: ");
+}
 void ExitProgram() {
     cout << "=====================\n";
     cout << "    Program Ended    \n";
@@ -359,6 +404,12 @@ void Start(EnFilterOptions choice) {
 			FiltersMenu();
 			break;
 		}
+		case EnFilterOptions::FlipImage:
+		{
+			FlipImageFlow();
+			FiltersMenu();
+			break;
+		}
         case EnFilterOptions::Exit:
         {
             ExitProgram();
@@ -376,6 +427,7 @@ void FiltersMenu() {
     cout<<  "\t [2]  Black and White Filter\n";
     cout<<  "\t [3]  Invert Filter\n";
 	cout << "\t [4]  Frame Image Filter\n";
+	cout << "\t [5]  Flip Image Filter\n";
     cout << "\t [17] Exit\n";
     cout << "=================================\n";
     Start(GetChoice());

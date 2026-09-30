@@ -30,7 +30,9 @@ enum class EnFilterOptions {
 	 FrameImage=4,
 	 FlipImage=5,
 	 Rotate = 6,
-     Exit = 9 
+     Darken=7,
+     Lighten=8,
+     Exit = 10
 };
 // Function for loading Images
 void LoadImage(Image& img, string prompt = "Enter image filename: ") {
@@ -421,6 +423,62 @@ void RotateFlow() {
     RotateImageFilter(UserImage);
     SaveImage(UserImage, "Enter image filename to save: ");
 }
+
+//filter 7 consist of two filters(darken,lighten)
+// allow the user to choose the level of darkening or lighting from 0 to 100%  (Done)
+int GetPercentage()
+{
+	int percentage;
+	cout << "Enter the percentage (0 - 100): ";
+	cin >> percentage;
+	while (percentage < 0 || percentage > 100)
+	{
+		cout << "Invalid percentage. Enter a value between 0 and 100: ";
+		cin >> percentage;
+	}
+	return percentage;
+}
+
+void Darken(Image &image, int percentage) {
+	for (int i=0;i<image.width;++i) {
+		for (int j=0;j<image.height;++j) {
+			for (int k=0;k<3;++k) {
+				image(i,j,k) = image(i,j,k) - (image(i,j,k) * percentage / 100);   }
+		}
+	}
+
+}
+
+
+void Lighten(Image &image, int percentage) {
+	for (int i=0;i<image.width;++i) {
+		for (int j=0;j<image.height;++j) {
+			for (int k=0;k<3;++k) {
+				image(i,j,k) = image(i,j,k) +((255-image(i,j,k)) * percentage / 100);
+			}
+		}
+	}
+
+}
+void DarkenImageFlow() {
+	Image userImage;
+	LoadImage(userImage, "Enter image filename to Darken: ");
+	int percentage = GetPercentage();
+	Darken(userImage, percentage);
+	SaveImage(userImage, "Enter image filename to save: ");
+}
+void LightenImageFlow() {
+	Image userImage;
+	LoadImage(userImage, "Enter image filename to Lighten: ");
+	int percentage = GetPercentage();
+	Lighten(userImage, percentage);
+	SaveImage(userImage, "Enter image filename to save: ");
+}
+//-------------------------------------------------------------------
+
+
+
+
 void ExitProgram() {
     cout << "=====================\n";
     cout << "    Program Ended    \n";
@@ -465,6 +523,16 @@ void Start(EnFilterOptions choice) {
 			FiltersMenu();
 			break;
 		}
+       case EnFilterOptions::Darken:{
+          DarkenImageFlow();
+          FiltersMenu();
+          break;
+              }
+       case EnFilterOptions::Lighten:{
+        	LightenImageFlow();
+            FiltersMenu();
+            break;
+             }
         case EnFilterOptions::Exit:
         {
             ExitProgram();
@@ -490,7 +558,9 @@ void FiltersMenu() {
 	cout << "\t [4]  Frame Image Filter\n";
 	cout << "\t [5]  Flip Image Filter\n";
 	cout<<  "\t [6]  Rotate Filter\n";
-    cout << "\t [9]  Exit\n";
+    cout<<  "\t [7]  Darken Image Filter\n";
+    cout<<  "\t [8]  Lighten Image Filter\n";
+    cout << "\t [10]  Exit\n";
     cout << "=================================\n";
     Start(GetChoice());
 }

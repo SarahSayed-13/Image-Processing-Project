@@ -264,14 +264,9 @@ void DoubleBorder(Image& image)
 
 	}
 }
-void DoubleBorderWithCornerPatterns(Image& image)
+ 
+void WhiteSquaresinCorner(Image& image, FrameData DataOfFrame, int Thickness)
 {
-	FrameData DataOfFrame = ReadData();
-	SimpleFrame(image, DataOfFrame);
-	FrameData SecondFrame = HelperFunGetSecondFrame();
-	int Gap = 0;
-	int Thickness = 3;
-	InnerFrame(image, DataOfFrame, SecondFrame, Gap, Thickness);
 	int CornerSize = 15;
 	for (int i = 0; i < CornerSize; i++)
 	{
@@ -289,6 +284,153 @@ void DoubleBorderWithCornerPatterns(Image& image)
 	}
 
 }
+void DiamondInCorners(Image& image, FrameData DataOfFrame, int Thickness)
+{
+	int CornerSize = 30;
+	int Center = CornerSize / 2;
+	int Radius = CornerSize / 2;
+	for (int i = 0; i < CornerSize; i++)
+	{
+		for (int j = 0; j < CornerSize; j++)
+		{
+			if (abs(i - Center) + abs(j - Center) <= Radius)
+			{
+				for (int c = 0; c < 3; c++)
+				{
+					image.setPixel(i + DataOfFrame.FrameWidth + Thickness, j + DataOfFrame.FrameHeight + Thickness, c, 255);
+					image.setPixel(image.width - DataOfFrame.FrameWidth - Thickness - CornerSize + i, j + DataOfFrame.FrameHeight + Thickness, c, 255);
+					image.setPixel(i + DataOfFrame.FrameWidth + Thickness, image.height - DataOfFrame.FrameHeight - Thickness - CornerSize + j, c, 255);
+					image.setPixel(image.width - DataOfFrame.FrameWidth - Thickness - CornerSize + i, image.height - DataOfFrame.FrameHeight - Thickness - CornerSize + j, c, 255);
+				}
+			}
+		}
+	}
+}
+
+void FullDiamondInImage(Image& image, FrameData DataOfFrame)
+{
+	int CornerSize = min(DataOfFrame.FrameWidth, DataOfFrame.FrameHeight);
+	int Radius = CornerSize / 2;
+	int Center = CornerSize / 2;
+	for (int i = 0; i < CornerSize; i++)
+	{
+		for (int j = 0; j < CornerSize; j++)
+		{
+			if (abs(i - Center) + (abs(j - Center)) <= Radius)
+			{
+
+				for (int x = 0; x < image.width; x += CornerSize)
+				{
+					if ((x + i) < image.width && (image.height - CornerSize + j) < image.height)
+					{
+						image.setPixel(x + i, j, 0, 255);
+						image.setPixel(x + i, j, 1, 215);
+						image.setPixel(x + i, j, 2, 0);
+
+						image.setPixel(i + x, image.height - CornerSize + j, 0, 255);
+						image.setPixel(i + x, image.height - CornerSize + j, 1, 215);
+						image.setPixel(i + x, image.height - CornerSize + j, 2, 0);
+					}
+
+				}
+				for (int y = 0; y < image.height; y += CornerSize)
+				{
+					if ((j + y) < image.height && (image.width - CornerSize + i) < image.width)
+					{
+						image.setPixel(i, j + y, 0, 255);
+						image.setPixel(i, j + y, 1, 215);
+						image.setPixel(i, j + y, 2, 0);
+
+						image.setPixel(image.width - CornerSize + i, j + y, 0, 255);
+						image.setPixel(image.width - CornerSize + i, j + y, 1, 215);
+						image.setPixel(image.width - CornerSize + i, j + y, 2, 0);
+					}
+				}
+
+			}
+		}
+	}
+}
+void DiagonalStripesInImage(Image& image, FrameData DataOfFrame)
+{
+	int CornerSize = min(DataOfFrame.FrameHeight, DataOfFrame.FrameWidth);
+	for (int i = 0; i < CornerSize; i++)
+	{
+		for (int j = 0; j < CornerSize; j++)
+		{
+			if ((i + j) % 4 == 0)
+			{
+				for (int x = 0; x < image.width; x += CornerSize)
+				{
+					if ((x + i) < image.width && j < image.height)
+					{
+						image.setPixel(x + i, j, 0, 255);
+						image.setPixel(x + i, j, 1, 215);
+						image.setPixel(x + i, j, 2, 0);
+					}
+
+					if ((x + i) < image.width && ((image.height - CornerSize + j) < image.height))
+					{
+						image.setPixel(i + x, image.height - CornerSize + j, 0, 255);
+						image.setPixel(i + x, image.height - CornerSize + j, 1, 215);
+						image.setPixel(i + x, image.height - CornerSize + j, 2, 0);
+					}
+				}
+				for (int y = 0; y < image.height; y += CornerSize)
+
+				{
+					if ((j + y) < image.height && i < image.width)
+					{
+						image.setPixel(i, j + y, 0, 255);
+						image.setPixel(i, j + y, 1, 215);
+						image.setPixel(i, j + y, 2, 0);
+					}
+					if ((j + y) < image.height && (image.width - CornerSize + i) < image.width)
+					{
+						image.setPixel(image.width - CornerSize + i, j + y, 0, 255);
+						image.setPixel(image.width - CornerSize + i, j + y, 1, 215);
+						image.setPixel(image.width - CornerSize + i, j + y, 2, 0);
+					}
+				}
+			}
+		}
+	}
+}
+enum StyleOfDoubleBorderWithCornerPatterns { CornerWhiteSquares = 1, CorenerDiamond = 2, FullDiamond = 3, DiagonalStripes = 4 };
+void DoubleBorderWithCornerPatterns(Image& image)
+{
+	int StyleNum;
+	do
+	{
+		cout << "Please,Enter What Style Of Double Border With Corner Patterns do You Want? CornerWhiteSquares[1] ,CornerDiamond[2] ,FullDiamond[3],DiagonalStripes[4]\n";
+		cin >> StyleNum;
+	} while (StyleNum != 1 && StyleNum != 2 && StyleNum != 3 && StyleNum != 4);
+	StyleOfDoubleBorderWithCornerPatterns Styles = StyleOfDoubleBorderWithCornerPatterns(StyleNum);
+	FrameData DataOfFrame = ReadData();
+	SimpleFrame(image, DataOfFrame);
+	FrameData SecondFrame = HelperFunGetSecondFrame();
+	int Gap = 0;
+	int Thickness = 3;
+	InnerFrame(image, DataOfFrame, SecondFrame, Gap, Thickness);
+	if (Styles == CornerWhiteSquares)
+	{
+		WhiteSquaresinCorner(image, DataOfFrame, Thickness);
+
+	}
+	else if (Styles == CorenerDiamond)
+	{
+		DiamondInCorners(image, DataOfFrame, Thickness);
+	}
+	else if (Styles == FullDiamond)
+	{
+		FullDiamondInImage(image, DataOfFrame);
+	}
+	else
+	{
+		DiagonalStripesInImage(image, DataOfFrame);
+	}
+}
+
 
 
 void FrameImage(Image& image)
@@ -316,8 +458,13 @@ void FrameImage(Image& image)
 	case DoubleBorderWithCornerPatternsChoice:
 		DoubleBorderWithCornerPatterns(image);
 		break;
+	default:
+		cout << "Wrong Choice,Please Try Again\n";
 	}
+
+
 }
+
 void FrameImageFlow()
 {
 	Image UserImage;
@@ -486,8 +633,10 @@ void ResizeImage(Image& image)
 		cout << "Would you like to resize the image by Ratio or Dimensions? Ratio[1] , Dimensions[2]\n";
 		cin >> ChooseResize;
 	} while (ChooseResize != 1 && ChooseResize != 2);
+
 	int NewWidth, NewHeight;
 	TypeOfResize Resize = TypeOfResize(ChooseResize);
+
 	if (Resize == Ratio)
 	{
 		double ratio;

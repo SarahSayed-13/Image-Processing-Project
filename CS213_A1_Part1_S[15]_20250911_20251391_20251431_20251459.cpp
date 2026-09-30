@@ -24,14 +24,15 @@ Section: S[ 15 || 16 ]
 #include "Image_Class.h"
 using namespace std;
 enum class EnFilterOptions {
-    GrayScale = 1,
-     BlackAndWhite = 2,
-     Invert=3,
-	 FrameImage=4,
-	 FlipImage=5,
-	 Rotate = 6,
-     Darken=7,
-     Lighten=8,
+	GrayScale = 1,
+	BlackAndWhite = 2,
+	Invert = 3,
+	FrameImage = 4,
+	FlipImage = 5,
+	Rotate = 6,
+	Darken = 7,
+	Lighten = 8,
+	Resize = 9,
      Exit = 10
 };
 // Function for loading Images
@@ -474,6 +475,70 @@ void LightenImageFlow() {
 	Lighten(userImage, percentage);
 	SaveImage(userImage, "Enter image filename to save: ");
 }
+
+
+enum TypeOfResize { Ratio = 1, Dimensions = 2 };
+void ResizeImage(Image& image)
+{
+	int ChooseResize;
+	do
+	{
+		cout << "Would you like to resize the image by Ratio or Dimensions? Ratio[1] , Dimensions[2]\n";
+		cin >> ChooseResize;
+	} while (ChooseResize != 1 && ChooseResize != 2);
+	int NewWidth, NewHeight;
+	TypeOfResize Resize = TypeOfResize(ChooseResize);
+	if (Resize == Ratio)
+	{
+		double ratio;
+		do
+		{
+			cout << "PLease,Enter the Ratio Number to  resize the image\n";
+			cin >> ratio;
+		} while (ratio <= 0);
+		NewWidth = max(1, (int)(image.width * ratio));
+		NewHeight = max(1, (int)(image.height * ratio));
+	}
+	else if (Resize == Dimensions)
+	{
+		int WidthNumber, HeightNumber;
+		do
+		{
+			cout << "Please,Enter the New Width to resize the image\n";
+			cin >> WidthNumber;
+		} while (WidthNumber <= 0);
+		do
+		{
+			cout << "Please,Enter the New Height to  resize the image\n";
+			cin >> HeightNumber;
+		} while (HeightNumber <= 0);
+		NewWidth = WidthNumber;
+		NewHeight = HeightNumber;
+	}
+	Image NewImage(NewWidth, NewHeight);
+	double ScaleWidth = (double)image.width / NewImage.width;
+	double ScaleHeight = (double)image.height / NewImage.height;
+	for (int i = 0; i < NewImage.width; i++)
+	{
+		for (int j = 0; j < NewImage.height; j++)
+		{
+			int OldWidth = i * ScaleWidth;
+			int OldHeight = j * ScaleHeight;
+			for (int c = 0; c < 3; c++)
+			{
+				NewImage.setPixel(i, j, c, image.getPixel(OldWidth, OldHeight, c));
+			}
+		}
+	}
+	image = NewImage;
+}
+void ResizeFlow() {
+	Image UserImage;
+	LoadImage(UserImage, "Enter Image FileName to Resize Image : ");
+	ResizeImage(UserImage);
+	SaveImage(UserImage, "Enter Image FileName To Save: ");
+}
+
 //-------------------------------------------------------------------
 
 
@@ -544,6 +609,12 @@ void Start(EnFilterOptions choice) {
             FiltersMenu();
             break;
         }
+		case EnFilterOptions::Resize:
+		{
+			ResizeFlow();
+			FiltersMenu();
+			break;
+		}
         default:
             cout << "\nInvalid Choice! Try again.\n\n";
             FiltersMenu();
@@ -560,6 +631,7 @@ void FiltersMenu() {
 	cout<<  "\t [6]  Rotate Filter\n";
     cout<<  "\t [7]  Darken Image Filter\n";
     cout<<  "\t [8]  Lighten Image Filter\n";
+	cout << "\t [9]  Resize Image Filter\n";
     cout << "\t [10]  Exit\n";
     cout << "=================================\n";
     Start(GetChoice());

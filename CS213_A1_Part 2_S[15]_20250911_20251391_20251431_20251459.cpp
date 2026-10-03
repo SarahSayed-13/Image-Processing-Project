@@ -33,7 +33,8 @@ enum class EnFilterOptions {
 	Darken = 7,
 	Lighten = 8,
 	Resize = 9,
-     Exit = 10
+	Merge = 10,
+     Exit = 11
 };
 // Function for loading Images
 void LoadImage(Image& img, string prompt = "Enter image filename: ") {
@@ -687,12 +688,44 @@ void ResizeFlow() {
 	ResizeImage(UserImage);
 	SaveImage(UserImage, "Enter Image FileName To Save: ");
 }
+// Filter 9: Merge // 
+void ResizeImageInternal(const Image& src, int targetW, int targetH, Image& resized) {
+    resized = Image(targetW, targetH);
+    for (int y = 0; y < targetH; ++y) {
+        for (int x = 0; x < targetW; ++x) {
+            int srcX = (x * src.width) / targetW;
+            int srcY = (y * src.height) / targetH;
+            for (int c = 0; c < src.channels; ++c) {
+                resized(x, y, c) = src(srcX, srcY, c);
+            }
+        }
+    }
+}
+void MergeImages(const Image& img1, const Image& img2, int targetW, int targetH, Image& output) {
+    output = Image(targetW, targetH);
+    for (int y = 0; y < targetH; ++y) {
+        for (int x = 0; x < targetW; ++x) {
+            for (int c = 0; c < img1.channels; ++c) {
+                output(x, y, c) = (img1(x, y, c) + img2(x, y, c)) / 2;
+            }
+        }
+    }
+}
+void MergeFlow() {
+    Image img1, img2;
+    LoadImage(img1, "Enter first image filename to Merge: ");
+    LoadImage(img2, "Enter second image filename to Merge: ");
 
-//-------------------------------------------------------------------
+    int targetW = max(img1.width, img2.width);
+    int targetH = max(img1.height, img2.height);
 
+    Image resized1, resized2, result;
+    ResizeImageInternal(img1, targetW, targetH, resized1);
+    ResizeImageInternal(img2, targetW, targetH, resized2);
 
-
-
+    MergeImages(resized1, resized2, targetW, targetH, result);
+    SaveImage(result, "Enter image filename to save merged image: ");
+}
 void ExitProgram() {
     cout << "=====================\n";
     cout << "    Program Ended    \n";
@@ -764,6 +797,12 @@ void Start(EnFilterOptions choice) {
 			FiltersMenu();
 			break;
 		}
+		case EnFilterOptions::Merge:
+		{
+			MergeFlow();
+			FiltersMenu();
+			break;
+		}
         default:
             cout << "\nInvalid Choice! Try again.\n\n";
             FiltersMenu();
@@ -781,7 +820,8 @@ void FiltersMenu() {
     cout<<  "\t [7]  Darken Image Filter\n";
     cout<<  "\t [8]  Lighten Image Filter\n";
 	cout << "\t [9]  Resize Image Filter\n";
-    cout << "\t [10]  Exit\n";
+	cout << "\t [10]  Merge Images Filter\n";
+    cout << "\t [11]  Exit\n";
     cout << "=================================\n";
     Start(GetChoice());
 }

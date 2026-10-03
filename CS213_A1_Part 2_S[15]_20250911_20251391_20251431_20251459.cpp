@@ -34,7 +34,8 @@ enum class EnFilterOptions {
 	Lighten = 8,
 	Resize = 9,
 	Merge = 10,
-     Exit = 11
+	DetectEdges=11,
+    Exit = 12
 };
 // Function for loading Images
 void LoadImage(Image& img, string prompt = "Enter image filename: ") {
@@ -726,6 +727,43 @@ void MergeFlow() {
     MergeImages(resized1, resized2, targetW, targetH, result);
     SaveImage(result, "Enter image filename to save merged image: ");
 }
+// Filter 10 Detect Edges
+void DetectImageEdgesFilter( Image &UserImage) {
+    GrayScale(UserImage);
+    Image EdgedImage(UserImage.width,UserImage.height);
+    for (int i=0;i<EdgedImage.width;i++) {
+        for (int j=0;j<EdgedImage.height;j++) {
+            for (int k=0;k<3;k++) {
+                EdgedImage(i,j,k)=255;
+            }
+        }
+    }
+    for (int i=1;i<EdgedImage.width-1;i++) {
+        for (int j=1;j<EdgedImage.height-1;j++) {
+            int Gradient_X=UserImage(i,j+1,0)-UserImage(i,j-1,0);
+            int Gradient_Y=UserImage(i+1,j,0)-UserImage(i-1,j,0);
+            int Threshold=128;
+            if (abs(Gradient_X)+abs(Gradient_Y)>Threshold) {
+                EdgedImage(i,j,0)=0;
+                EdgedImage(i,j,1)=0;
+                EdgedImage(i,j,2)=0;
+            }
+            else {
+                EdgedImage(i,j,0)=255;
+                EdgedImage(i,j,1)=255;
+                EdgedImage(i,j,2)=255;
+            }
+        }
+    }
+    UserImage=EdgedImage;
+}
+// Flow Detect Edges //
+void DetectFlow() {
+    Image UserImage;
+    LoadImage(UserImage, "Enter image filename for Detecting Edges : ");
+    DetectImageEdgesFilter(UserImage);
+    SaveImage(UserImage, "Enter image filename to save: ");
+}
 void ExitProgram() {
     cout << "=====================\n";
     cout << "    Program Ended    \n";
@@ -770,20 +808,17 @@ void Start(EnFilterOptions choice) {
 			FiltersMenu();
 			break;
 		}
-       case EnFilterOptions::Darken:{
+       case EnFilterOptions::Darken:
+	   {
           DarkenImageFlow();
           FiltersMenu();
           break;
-              }
-       case EnFilterOptions::Lighten:{
+        }
+       case EnFilterOptions::Lighten:
+	   {
         	LightenImageFlow();
             FiltersMenu();
             break;
-             }
-        case EnFilterOptions::Exit:
-        {
-            ExitProgram();
-            return;
         }
 		case EnFilterOptions::Rotate:
         {
@@ -803,6 +838,17 @@ void Start(EnFilterOptions choice) {
 			FiltersMenu();
 			break;
 		}
+		case EnFilterOptions::DetectEdges:
+		{
+			DetectFlow();
+			FiltersMenu();
+			break;
+		}
+		case EnFilterOptions::Exit:
+        {
+            ExitProgram();
+            return;
+        }
         default:
             cout << "\nInvalid Choice! Try again.\n\n";
             FiltersMenu();
@@ -821,7 +867,8 @@ void FiltersMenu() {
     cout<<  "\t [8]  Lighten Image Filter\n";
 	cout << "\t [9]  Resize Image Filter\n";
 	cout << "\t [10]  Merge Images Filter\n";
-    cout << "\t [11]  Exit\n";
+	cout<<  "\t [11]  Detect Image Edges\n";
+    cout << "\t [12]  Exit\n";
     cout << "=================================\n";
     Start(GetChoice());
 }

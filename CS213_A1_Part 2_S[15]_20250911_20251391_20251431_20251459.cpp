@@ -35,7 +35,8 @@ enum class EnFilterOptions {
 	Resize = 9,
 	Merge = 10,
 	DetectEdges=11,
-    Exit = 12
+    CropImage=12,
+    Exit = 13
 };
 // Function for loading Images
 void LoadImage(Image& img, string prompt = "Enter image filename: ") {
@@ -764,6 +765,47 @@ void DetectFlow() {
     DetectImageEdgesFilter(UserImage);
     SaveImage(UserImage, "Enter image filename to save: ");
 }
+
+//Filter 11: Crop
+void CropImage(Image &image) {
+	int x, y, width, height;
+
+	cout << "Enter x, y, width, and height: ";
+	cin >> x >> y >> width >> height;
+	while (x < 0  || y < 0||
+		  width <= 0 ||   height <= 0 ||
+		  x + width > image.width// out of width of photo
+		  ||
+		  y + height > image.height)//out of height of photo
+	{
+		cout << "Invalid crop dimensions. Please enter valid values.\n";
+		cout << "Enter x, y, width, and height: ";
+		cin >> x >> y >> width >> height;
+	}
+	Image cropped(width,height);
+	for (int i=0;i<width;++i) {
+		for (int j=0;j<height;j++) {
+			for (int k=0;k<3;++k) {
+				cropped(i,j,k)=image(x+i,y+j,k);
+			}
+		}
+	}
+
+
+	image = cropped;
+}
+
+
+void CropImageFlow() {
+	Image UserImage;
+	LoadImage(UserImage, "Enter image filename for CropImage : ");
+	CropImage(UserImage);
+	SaveImage(UserImage, "Enter image filename to save: ");
+}
+
+
+
+
 void ExitProgram() {
     cout << "=====================\n";
     cout << "    Program Ended    \n";
@@ -844,6 +886,12 @@ void Start(EnFilterOptions choice) {
 			FiltersMenu();
 			break;
 		}
+    	case EnFilterOptions::CropImage:
+        {
+        	CropImageFlow();
+        	FiltersMenu();
+        	break;
+        }
 		case EnFilterOptions::Exit:
         {
             ExitProgram();
@@ -868,7 +916,8 @@ void FiltersMenu() {
 	cout << "\t [9]  Resize Image Filter\n";
 	cout << "\t [10]  Merge Images Filter\n";
 	cout<<  "\t [11]  Detect Image Edges\n";
-    cout << "\t [12]  Exit\n";
+    cout<<  "\t [12]  Crop Image Filter\n";
+    cout << "\t [13]  Exit\n";
     cout << "=================================\n";
     Start(GetChoice());
 }

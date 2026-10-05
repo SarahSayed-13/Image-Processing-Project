@@ -34,9 +34,10 @@ enum class EnFilterOptions {
 	Lighten = 8,
 	Resize = 9,
 	Merge = 10,
-	DetectEdges=11,
-    CropImage=12,
-    Exit = 13
+	DetectEdges = 11,
+	CropImage = 12,
+	SunLight = 13,
+	Exit = 14
 };
 // Function for loading Images
 void LoadImage(Image& img, string prompt = "Enter image filename: ") {
@@ -804,7 +805,27 @@ void CropImageFlow() {
 }
 
 
+// Filter 13: Sunlight //
+void SunLightFilter(Image& image) {
+    for (int y = 0; y < image.height; ++y) {
+        for (int x = 0; x < image.width; ++x) {
+            int r = image(x, y, 0) + 40;
+            image(x, y, 0) = min(255, r);
+            int g = image(x, y, 1) + 25;
+            image(x, y, 1) = min(255, g);
+            int b = image(x, y, 2) - 20;
+            image(x, y, 2) = max(0, b);
+        }
+    }
+}
 
+// Flow Sunlight //
+void SunLightFlow() {
+    Image userImage;
+    LoadImage(userImage, "Enter image filename for Sunlight filter: ");
+    SunLightFilter(userImage);
+    SaveImage(userImage, "Enter image filename to save: ");
+}
 
 void ExitProgram() {
     cout << "=====================\n";
@@ -834,65 +855,71 @@ void Start(EnFilterOptions choice) {
         }
         case EnFilterOptions::Invert:
         {
-         InvertFlow();
-         FiltersMenu();
-         break;
-        }
-		case EnFilterOptions::FrameImage:
-		{
-			FrameImageFlow();
-			FiltersMenu();
-			break;
-		}
-		case EnFilterOptions::FlipImage:
-		{
-			FlipImageFlow();
-			FiltersMenu();
-			break;
-		}
-       case EnFilterOptions::Darken:
-	   {
-          DarkenImageFlow();
-          FiltersMenu();
-          break;
-        }
-       case EnFilterOptions::Lighten:
-	   {
-        	LightenImageFlow();
+            InvertFlow();
             FiltersMenu();
             break;
         }
-		case EnFilterOptions::Rotate:
+        case EnFilterOptions::FrameImage:
+        {
+            FrameImageFlow();
+            FiltersMenu();
+            break;
+        }
+        case EnFilterOptions::FlipImage:
+        {
+            FlipImageFlow();
+            FiltersMenu();
+            break;
+        }
+        case EnFilterOptions::Darken:
+        {
+            DarkenImageFlow();
+            FiltersMenu();
+            break;
+        }
+        case EnFilterOptions::Lighten:
+        {
+            LightenImageFlow();
+            FiltersMenu();
+            break;
+        }
+        case EnFilterOptions::Rotate:
         {
             RotateFlow();
             FiltersMenu();
             break;
         }
-		case EnFilterOptions::Resize:
-		{
-			ResizeFlow();
-			FiltersMenu();
-			break;
-		}
-		case EnFilterOptions::Merge:
-		{
-			MergeFlow();
-			FiltersMenu();
-			break;
-		}
-		case EnFilterOptions::DetectEdges:
-		{
-			DetectFlow();
-			FiltersMenu();
-			break;
-		}
-    	case EnFilterOptions::CropImage:
+        case EnFilterOptions::Resize:
         {
-        	CropImageFlow();
-        	FiltersMenu();
-        	break;
+            ResizeFlow();
+            FiltersMenu();
+            break;
         }
-		case EnFilterOptions::Exit:
+        case EnFilterOptions::Merge:
+        {
+            MergeFlow();
+            FiltersMenu();
+            break;
+        }
+        case EnFilterOptions::DetectEdges:
+        {
+            DetectFlow();
+            FiltersMenu();
+            break;
+        }
+        case EnFilterOptions::CropImage:
+        {
+            CropImageFlow();
+            FiltersMenu();
+            break;
+        }
+        case EnFilterOptions::SunLight:
+        {
+            SunLightFlow();
+            FiltersMenu();
+            break;
+        }
+        case EnFilterOptions::Exit:
         {
             ExitProgram();
             return;
@@ -904,21 +931,22 @@ void Start(EnFilterOptions choice) {
     }
 }
 void FiltersMenu() {
-    cout << "=================================\n";
-    cout << "\t [1]  GrayScale Filter\n";
-    cout<<  "\t [2]  Black and White Filter\n";
-    cout<<  "\t [3]  Invert Filter\n";
-	cout << "\t [4]  Frame Image Filter\n";
-	cout << "\t [5]  Flip Image Filter\n";
-	cout<<  "\t [6]  Rotate Filter\n";
-    cout<<  "\t [7]  Darken Image Filter\n";
-    cout<<  "\t [8]  Lighten Image Filter\n";
-	cout << "\t [9]  Resize Image Filter\n";
-	cout << "\t [10]  Merge Images Filter\n";
-	cout<<  "\t [11]  Detect Image Edges\n";
-    cout<<  "\t [12]  Crop Image Filter\n";
-    cout << "\t [13]  Exit\n";
-    cout << "=================================\n";
+    cout<< "=================================\n";
+    cout<< "\t [1]   GrayScale Filter\n";
+    cout<< "\t [2]   Black and White Filter\n";
+    cout<< "\t [3]   Invert Filter\n";
+	cout<< "\t [4]   Frame Image Filter\n";
+	cout<< "\t [5]   Flip Image Filter\n";
+	cout<< "\t [6]   Rotate Filter\n";
+    cout<< "\t [7]   Darken Image Filter\n";
+    cout<< "\t [8]   Lighten Image Filter\n";
+	cout<< "\t [9]   Resize Image Filter\n";
+	cout<< "\t [10]  Merge Images Filter\n";
+	cout<< "\t [11]  Detect Image Edges\n";
+    cout<< "\t [12]  Crop Image Filter\n";
+    cout<< "\t [13]  Sunlight Filter\n";
+    cout<< "\t [14]  Exit\n";
+    cout<< "=================================\n";
     Start(GetChoice());
 }
 int main() {

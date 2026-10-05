@@ -9,7 +9,7 @@ Team Members:
 1. Sarah Sayed Hafez Mohamed     - ID: [20250911]   - (Filter 1: Grayscale, Filter 5: Flip)
 2. Mariam Helmy Mahmoud Helmy    - ID: [20251391]   - (Filter 2: Black & White, Filter 6: Rotate)
 3. Menna Tamer Hassan Said       - ID: [20251431]   - (Filter 3: Invert, Filter 7: Darken/Lighten)
-4. Nour Osama Ali Ibrahim Rakha  - ID: [20251459]   - (Filter 4: Frame, Filter 8: Resize)
+4. Nour Osama Ali Ibrahim Rakha  - ID: [20251459]   - (Filter 4: Frame, Filter 8: Resize ,Filter 12:Blur)
 
 Section: S[ 15 || 16 ]
 ================================================================================
@@ -37,7 +37,8 @@ enum class EnFilterOptions {
 	DetectEdges = 11,
 	CropImage = 12,
 	SunLight = 13,
-	Exit = 14
+	Blur=14,
+	Exit = 15
 };
 // Function for loading Images
 void LoadImage(Image& img, string prompt = "Enter image filename: ") {
@@ -249,7 +250,7 @@ void DoubleBorder(Image& image)
 	int Position;
 	do
 	{
-		cout << "Please, Where do you want the frame to be ? Inside[1] , Outsid[2]\n";
+		cout << "Please, Where do you want the frame to be ? Inside[1] , Outside[2]\n";
 		cin >> Position;
 	} while (Position != 1 && Position != 2);
 	DoubleFrame position = DoubleFrame(Position);
@@ -826,6 +827,54 @@ void SunLightFlow() {
     SunLightFilter(userImage);
     SaveImage(userImage, "Enter image filename to save: ");
 }
+enum LevelOfBlur { Light = 1, Medium = 2, Heavy = 3 };
+void BlurImage(Image& image)
+{
+	Image NewBlurImage(image.width, image.height);
+	int Num;
+	do
+	{
+		cout << "What Level Of Blur You Want In This Image?Light [1] , Medium[2] , Heavy [3]? Please,Enter The Level\n";
+		cin >> Num;
+	} while (Num < 1 || Num>3);
+	LevelOfBlur Level = LevelOfBlur(Num);
+	int Rad = Level;
+	for (int i = 0; i < image.width; i++)
+	{
+		for (int j = 0; j < image.height; j++)
+		{
+			int RedSum = 0;
+			int GreenSum = 0;
+			int BlueSum = 0;
+			int Count = 0;
+			for (int x = i - Rad; x <= i + Rad; x++)
+			{
+				for (int y = j - Rad; y <= j + Rad; y++)
+				{
+					if (x >= 0 && x < image.width && y >= 0 && y < image.height)
+					{
+						RedSum += image.getPixel(x, y, 0);
+						GreenSum += image.getPixel(x, y, 1);
+						BlueSum += image.getPixel(x, y, 2);
+						Count++;
+					}
+				}
+			}
+			NewBlurImage.setPixel(i, j, 0, RedSum / Count);
+			NewBlurImage.setPixel(i, j, 1, GreenSum / Count);
+			NewBlurImage.setPixel(i, j, 2, BlueSum / Count);
+
+		}
+	}
+	image = NewBlurImage;
+}
+
+void BlurFlow() {
+	Image userImage;
+	LoadImage(userImage, "Enter Image Filename for Blur filter: ");
+	BlurImage(userImage);
+	SaveImage(userImage, "Enter image filename to save: ");
+}
 
 void ExitProgram() {
     cout << "=====================\n";
@@ -919,11 +968,18 @@ void Start(EnFilterOptions choice) {
             FiltersMenu();
             break;
         }
+		case EnFilterOptions::Blur:
+		{
+			BlurFlow();
+			FiltersMenu();
+			break;
+		}
         case EnFilterOptions::Exit:
         {
             ExitProgram();
             return;
         }
+		
         default:
             cout << "\nInvalid Choice! Try again.\n\n";
             FiltersMenu();
@@ -945,7 +1001,8 @@ void FiltersMenu() {
 	cout<< "\t [11]  Detect Image Edges\n";
     cout<< "\t [12]  Crop Image Filter\n";
     cout<< "\t [13]  Sunlight Filter\n";
-    cout<< "\t [14]  Exit\n";
+	cout <<"\t [14]  Blur Image Filter\n";
+    cout<< "\t [15]  Exit\n";
     cout<< "=================================\n";
     Start(GetChoice());
 }

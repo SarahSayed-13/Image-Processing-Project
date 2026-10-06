@@ -39,7 +39,8 @@ enum class EnFilterOptions {
 	SunLight = 13,
 	Blur=14,
 	TV=15,
-	Exit = 16
+    Purple=16,
+	Exit = 17
 };
 // Function for loading Images
 void LoadImage(Image& img, string prompt = "Enter image filename: ") {
@@ -907,6 +908,53 @@ void TVFlow() {
 	TVImageFilter(userImage);
 	SaveImage(userImage, "Enter image filename to save: ");
 }
+// Filter 15  look purple
+void Purple(Image &image) {
+	for (int i=0;i<image.width;++i) {
+		for (int j=0;j<image.height;++j) {
+			// Red --> k = 0
+			int red = image(i, j, 0);
+			red = red + (red * 20 / 100);
+
+			if (red > 255)
+				red = 255;
+
+			image(i, j, 0) = red;//update the old value of red with the new value
+
+
+			// Green --> k = 1
+			int green = image(i, j, 1);
+			green = green - (green * 20 / 100);
+
+			if (green < 0)
+				green = 0;
+
+			image(i, j, 1) = green;//update value
+
+
+			// Blue --> k = 2
+			int blue = image(i, j, 2);
+			blue = blue + (blue * 20 / 100);
+
+			if (blue > 255)
+				blue = 255;
+
+			image(i, j, 2) = blue;
+		}
+
+
+	}}
+
+	void PurpleFlow() {
+		Image UserImage;
+		LoadImage(UserImage, "Enter image filename for Purple Filter: : ");
+		Purple(UserImage);
+		SaveImage(UserImage, "Enter image filename to save: ");
+	}
+
+
+
+
 void ExitProgram() {
     cout << "=====================\n";
     cout << "    Program Ended    \n";
@@ -1011,6 +1059,11 @@ void Start(EnFilterOptions choice) {
 			FiltersMenu();
 			break;
 		}
+        case EnFilterOptions::Purple:{
+            PurpleFlow();
+            FiltersMenu();
+            break;
+         }
         case EnFilterOptions::Exit:
         {
             ExitProgram();
@@ -1040,7 +1093,8 @@ void FiltersMenu() {
     cout<< "\t [13]  Sunlight Filter\n";
 	cout <<"\t [14]  Blur Image Filter\n";
 	cout <<"\t [15]  TV Noise Image Filter\n";
-    cout<< "\t [16]  Exit\n";
+    cout<< "\t [16]  Purple Image Filter\n";
+    cout<< "\t [17]  Exit\n";
     cout<< "=================================\n";
     Start(GetChoice());
 }

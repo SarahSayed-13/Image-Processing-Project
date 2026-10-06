@@ -7,7 +7,7 @@ Program Name: Image Processing Program
 
 Team Members:
 1. Sarah Sayed Hafez Mohamed     - ID: [20250911]   - (Filter 1: Grayscale, Filter 5: Flip)
-2. Mariam Helmy Mahmoud Helmy    - ID: [20251391]   - (Filter 2: Black & White, Filter 6: Rotate)
+2. Mariam Helmy Mahmoud Helmy    - ID: [20251391]   - (Filter 2: Black & White, Filter 6: Rotate, Filter 10: Detect Edges, Filter 14 : TV Noise)
 3. Menna Tamer Hassan Said       - ID: [20251431]   - (Filter 3: Invert, Filter 7: Darken/Lighten)
 4. Nour Osama Ali Ibrahim Rakha  - ID: [20251459]   - (Filter 4: Frame, Filter 8: Resize ,Filter 12:Blur)
 
@@ -38,7 +38,8 @@ enum class EnFilterOptions {
 	CropImage = 12,
 	SunLight = 13,
 	Blur=14,
-	Exit = 15
+	TV=15,
+	Exit = 16
 };
 // Function for loading Images
 void LoadImage(Image& img, string prompt = "Enter image filename: ") {
@@ -875,7 +876,37 @@ void BlurFlow() {
 	BlurImage(userImage);
 	SaveImage(userImage, "Enter image filename to save: ");
 }
-
+// Filter TV
+double GetDarkFactor() {
+    double DarkFactor=0;
+    while (true) {
+        cout<<"Enter The Darkness Factor (0.5 to 0.7,inclusive) "<<endl;
+        cin>>DarkFactor;
+        if (DarkFactor>=0.5 && DarkFactor<=0.7) {
+            break;
+        }
+        else {
+            cout<<"Invalid Input, try again."<<endl;
+        }
+    }
+    return DarkFactor;
+}
+void TVImageFilter(Image &UserImage) {
+    double DarkFactor=GetDarkFactor();
+    for (int i=0;i<UserImage.height;i+=2) {
+        for (int j=0;j<UserImage.width;j++) {
+            for (int k=0;k<3;k++) {
+                UserImage(j,i,k)*=DarkFactor;
+            }
+        }
+    }
+}
+void TVFlow() {
+	Image userImage;
+	LoadImage(userImage, "Enter Image Filename for Blur filter: ");
+	TVImageFilter(userImage);
+	SaveImage(userImage, "Enter image filename to save: ");
+}
 void ExitProgram() {
     cout << "=====================\n";
     cout << "    Program Ended    \n";
@@ -974,6 +1005,12 @@ void Start(EnFilterOptions choice) {
 			FiltersMenu();
 			break;
 		}
+		case EnFilterOptions::TV:
+		{
+			TVFlow();
+			FiltersMenu();
+			break;
+		}
         case EnFilterOptions::Exit:
         {
             ExitProgram();
@@ -1002,7 +1039,8 @@ void FiltersMenu() {
     cout<< "\t [12]  Crop Image Filter\n";
     cout<< "\t [13]  Sunlight Filter\n";
 	cout <<"\t [14]  Blur Image Filter\n";
-    cout<< "\t [15]  Exit\n";
+	cout <<"\t [15]  TV Noise Image Filter\n";
+    cout<< "\t [16]  Exit\n";
     cout<< "=================================\n";
     Start(GetChoice());
 }

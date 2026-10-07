@@ -9,7 +9,7 @@ Team Members:
 1. Sarah Sayed Hafez Mohamed     - ID: [20250911]   - (Filter 1: Grayscale, Filter 5: Flip)
 2. Mariam Helmy Mahmoud Helmy    - ID: [20251391]   - (Filter 2: Black & White, Filter 6: Rotate, Filter 10: Detect Edges, Filter 14 : TV Noise)
 3. Menna Tamer Hassan Said       - ID: [20251431]   - (Filter 3: Invert, Filter 7: Darken/Lighten)
-4. Nour Osama Ali Ibrahim Rakha  - ID: [20251459]   - (Filter 4: Frame, Filter 8: Resize ,Filter 12:Blur)
+4. Nour Osama Ali Ibrahim Rakha  - ID: [20251459]   - (Filter 4: Frame, Filter 8: Resize ,Filter 12:Blur ,Filter 16 :Infrared Radiation )
 
 Section: S[ 15 || 16 ]
 ================================================================================
@@ -40,7 +40,8 @@ enum class EnFilterOptions {
 	Blur=14,
 	TV=15,
     Purple=16,
-	Exit = 17
+	Infrared=17,
+	Exit = 18
 };
 // Function for loading Images
 void LoadImage(Image& img, string prompt = "Enter image filename: ") {
@@ -952,7 +953,27 @@ void Purple(Image &image) {
 		SaveImage(UserImage, "Enter image filename to save: ");
 	}
 
+	void InfraredRadiation(Image& image)
+	{
+		for (int i = 0; i < image.width; i++)
+		{
+			for (int j = 0; j < image.height; j++)
+			{
+				image.setPixel(i, j, 0, 255);
+				int Green = 255 - image.getPixel(i, j, 1);
+				int Blue = 255 - image.getPixel(i, j, 2);
+				image.setPixel(i, j, 1, Green);
+				image.setPixel(i, j, 2, Blue);
+			}
+		}
+	}
 
+	void InfraredFlow() {
+		Image UserImage;
+		LoadImage(UserImage, "Enter image filename for Infrared Radiation Filter: : ");
+		InfraredRadiation(UserImage);
+		SaveImage(UserImage, "Enter image filename to save: ");
+	}
 
 
 void ExitProgram() {
@@ -1059,11 +1080,19 @@ void Start(EnFilterOptions choice) {
 			FiltersMenu();
 			break;
 		}
-        case EnFilterOptions::Purple:{
+        case EnFilterOptions::Purple:
+		{
             PurpleFlow();
             FiltersMenu();
             break;
          }
+	     
+		case  EnFilterOptions::Infrared:
+		{
+			InfraredFlow();
+			FilterMenu();
+			break;
+		}
         case EnFilterOptions::Exit:
         {
             ExitProgram();
@@ -1094,7 +1123,8 @@ void FiltersMenu() {
 	cout <<"\t [14]  Blur Image Filter\n";
 	cout <<"\t [15]  TV Noise Image Filter\n";
     cout<< "\t [16]  Purple Image Filter\n";
-    cout<< "\t [17]  Exit\n";
+	cout<< "\t [17] Infrared Radiation Filter\n";
+    cout<< "\t [18]  Exit\n";
     cout<< "=================================\n";
     Start(GetChoice());
 }

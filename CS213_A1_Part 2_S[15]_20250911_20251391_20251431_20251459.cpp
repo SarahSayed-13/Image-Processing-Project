@@ -8,7 +8,7 @@ Program Name: Image Processing Program
 Team Members:
 1. Sarah Sayed Hafez Mohamed     - ID: [20250911]   - (Filter 1: Grayscale, Filter 5: Flip)
 2. Mariam Helmy Mahmoud Helmy    - ID: [20251391]   - (Filter 2: Black & White, Filter 6: Rotate, Filter 10: Detect Edges, Filter 14 : TV Noise)
-3. Menna Tamer Hassan Said       - ID: [20251431]   - (Filter 3: Invert, Filter 7: Darken/Lighten)
+3. Menna Tamer Hassen Said       - ID: [20251431]   - (Filter 3: Invert , Filter 7: Darken/Lighten , Filter 11: Crop , Filter 15: Purple  )
 4. Nour Osama Ali Ibrahim Rakha  - ID: [20251459]   - (Filter 4: Frame, Filter 8: Resize ,Filter 12:Blur ,Filter 16 :Infrared Radiation )
 
 Section: S[ 15 || 16 ]
@@ -41,7 +41,8 @@ enum class EnFilterOptions {
 	TV=15,
     Purple=16,
 	Infrared=17,
-	Exit = 18
+	OilPainting=18,
+	Exit = 19
 };
 // Function for loading Images
 void LoadImage(Image& img, string prompt = "Enter image filename: ") {
@@ -975,6 +976,76 @@ void Purple(Image &image) {
 		SaveImage(UserImage, "Enter image filename to save: ");
 	}
 
+void OilPainting(Image &image)
+{
+    Image result = image;
+
+    int radius = 4;
+    int levels = 10;
+
+    for (int i = 0; i < image.width; i++)
+    {
+        for (int j = 0; j < image.height; j++)
+        {
+            int intensityCount[256] = {0};
+            int redSum[256] = {0};
+            int greenSum[256] = {0};
+            int blueSum[256] = {0};
+
+            for (int x = max(0, i - radius); x <= min(image.width - 1, i + radius); x++)
+            {
+                for (int y = max(0, j - radius); y <= min(image.height - 1, j + radius); y++)
+                {
+                    int r = image(x, y, 0);
+
+                    int g = image(x, y, 1);
+
+                    int b = image(x, y, 2);
+
+                    int curIntensity = ((r + g + b) / 3) * levels / 256;
+
+                    if (curIntensity >= levels) curIntensity = levels - 1;
+
+                    intensityCount[curIntensity]++;
+                    redSum[curIntensity] += r;
+                    greenSum[curIntensity] += g;
+                    blueSum[curIntensity] += b;
+                }
+            }
+
+
+            int maxLevel = 0;
+            for (int k = 1; k < levels; k++)
+            {
+                if (intensityCount[k] > intensityCount[maxLevel])
+                {
+                    maxLevel = k;
+                }
+            }
+
+
+            if (intensityCount[maxLevel] > 0)
+            {
+                result(i, j, 0) = redSum[maxLevel] / intensityCount[maxLevel];
+                result(i, j, 1) = greenSum[maxLevel] / intensityCount[maxLevel];
+                result(i, j, 2) = blueSum[maxLevel] / intensityCount[maxLevel];
+            }
+        }
+    }
+
+    image = result;
+
+
+}
+
+void OilPaintingFlow() {
+	Image UserImage;
+	LoadImage(UserImage, "Enter image filename for OilPainting Filter: : ");
+	OilPainting(UserImage);
+	SaveImage(UserImage, "Enter image filename to save: ");
+}
+
+
 
 void ExitProgram() {
     cout << "=====================\n";
@@ -1093,6 +1164,13 @@ void Start(EnFilterOptions choice) {
 			FiltersMenu();
 			break;
 		}
+
+        case EnFilterOptions::OilPainting:{
+        OilPaintingFlow();
+        FiltersMenu();
+        break;
+          }
+
         case EnFilterOptions::Exit:
         {
             ExitProgram();
@@ -1124,7 +1202,8 @@ void FiltersMenu() {
 	cout <<"\t [15]  TV Noise Image Filter\n";
     cout<< "\t [16]  Purple Image Filter\n";
 	cout<< "\t [17] Infrared Radiation Filter\n";
-    cout<< "\t [18]  Exit\n";
+    cout<< "\t [18]  Oil Painting Filter\n";
+    cout<< "\t [19]  Exit\n";
     cout<< "=================================\n";
     Start(GetChoice());
 }

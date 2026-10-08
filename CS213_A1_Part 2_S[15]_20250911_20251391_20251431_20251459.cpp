@@ -1090,7 +1090,7 @@ void Start(EnFilterOptions choice) {
 		case  EnFilterOptions::Infrared:
 		{
 			InfraredFlow();
-			FilterMenu();
+			FiltersMenu();
 			break;
 		}
         case EnFilterOptions::Exit:

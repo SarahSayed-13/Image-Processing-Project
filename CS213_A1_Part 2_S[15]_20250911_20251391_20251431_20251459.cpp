@@ -1,15 +1,13 @@
-
 /*
 ================================================================================
 Course: CS213 - Object-Oriented Programming (OOP)
-Assignment: Assignment 1 - Part 1
+Assignment: Assignment 1 - Part 2 
 Program Name: Image Processing Program
-
 Team Members:
-1. Sarah Sayed Hafez Mohamed     - ID: [20250911]   - (Filter 1: Grayscale, Filter 5: Flip)
-2. Mariam Helmy Mahmoud Helmy    - ID: [20251391]   - (Filter 2: Black & White, Filter 6: Rotate, Filter 10: Detect Edges, Filter 14 : TV Noise)
-3. Menna Tamer Hassen Said       - ID: [20251431]   - (Filter 3: Invert , Filter 7: Darken/Lighten , Filter 11: Crop , Filter 15: Purple  )
-4. Nour Osama Ali Ibrahim Rakha  - ID: [20251459]   - (Filter 4: Frame, Filter 8: Resize ,Filter 12:Blur ,Filter 16 :Infrared Radiation )
+1. Sarah Sayed Hafez Mohamed     - ID: [20250911]   - (Filter 1: Grayscale, Filter 5: Flip, Filter 9: Merge, Filter 13: Sunlight)
+2. Mariam Helmy Mahmoud Helmy    - ID: [20251391]   - (Filter 2: Black & White, Filter 6: Rotate, Filter 10: Detect Edges, Filter 14: TV Noise)
+3. Menna Tamer Hassen Said       - ID: [20251431]   - (Filter 3: Invert, Filter 7: Darken/Lighten, Filter 11: Crop, Filter 15: Purple)
+4. Nour Osama Ali Ibrahim Rakha  - ID: [20251459]   - (Filter 4: Frame, Filter 8: Resize, Filter 12: Blur, Filter 16: Infrared Radiation)
 
 Section: S[ 15 || 16 ]
 ================================================================================
@@ -41,8 +39,9 @@ enum class EnFilterOptions {
 	TV=15,
     Purple=16,
 	Infrared=17,
-	OilPainting=18,
-	Exit = 19
+	SkewImage = 18,
+	OilPainting=19,
+	Exit = 20
 };
 // Function for loading Images
 void LoadImage(Image& img, string prompt = "Enter image filename: ") {
@@ -1045,6 +1044,70 @@ void OilPaintingFlow() {
 	SaveImage(UserImage, "Enter image filename to save: ");
 }
 
+// 1.Horizontal Skew
+void SkewHorizontal(Image& image, double angleDegree) {
+    const double PI = 3.14159265358979323846;
+    double rad = (angleDegree * PI) / 180.0;
+    int shift = abs((int)(image.height * tan(rad)));
+    Image skewed(image.width + shift, image.height);
+    for (int y = 0; y < skewed.height; ++y)
+        for (int x = 0; x < skewed.width; ++x)
+            for (int c = 0; c < skewed.channels; ++c)
+                skewed(x, y, c) = 255;
+    for (int y = 0; y < image.height; ++y) {
+        int currentShift = (int)((image.height - 1 - y) * tan(rad));
+        for (int x = 0; x < image.width; ++x) {
+            for (int c = 0; c < image.channels; ++c) {
+                skewed(x + currentShift, y, c) = image(x, y, c);
+            }
+        }
+    }
+    image = skewed;
+}
+
+// 2. Vertical Skew
+void SkewVertical(Image& image, double angleDegree) {
+    const double PI = 3.14159265358979323846;
+    double rad = (angleDegree * PI) / 180.0;
+    int shift = abs((int)(image.width * tan(rad)));
+    Image skewed(image.width, image.height + shift);
+    for (int y = 0; y < skewed.height; ++y)
+        for (int x = 0; x < skewed.width; ++x)
+            for (int c = 0; c < skewed.channels; ++c)
+                skewed(x, y, c) = 255;
+    for (int x = 0; x < image.width; ++x) {
+        int currentShift = (int)(x * tan(rad));
+        for (int y = 0; y < image.height; ++y) {
+            for (int c = 0; c < image.channels; ++c) {
+                skewed(x, y + currentShift, c) = image(x, y, c);
+            }
+        }
+    }
+    image = skewed;
+}
+void SkewImageFlow() {
+    Image userImage;
+    LoadImage(userImage, "Enter image filename for Skewing: ");
+    int dirChoice;
+    cout << "\nChoose Skew Direction:\n";
+    cout << "1. Skew Horizontally\n";
+    cout << "2. Skew Vertically\n";
+    cout << "Enter your choice (1 or 2): ";
+    cin >> dirChoice;
+    while (dirChoice != 1 && dirChoice != 2) {
+        cout << "Invalid choice! Enter 1 or 2: ";
+        cin >> dirChoice;
+    }
+    double angle;
+    cout << "Enter skew angle in degrees: ";
+    cin >> angle;
+    if (dirChoice == 1) {
+        SkewHorizontal(userImage, angle);
+    } else {
+        SkewVertical(userImage, angle);
+    }
+    SaveImage(userImage, "Enter image filename to save: ");
+}
 
 
 void ExitProgram() {
@@ -1171,6 +1234,13 @@ void Start(EnFilterOptions choice) {
         break;
           }
 
+		case EnFilterOptions::SkewImage:
+        {
+            SkewImageFlow();
+            FiltersMenu();
+            break;
+        }
+
         case EnFilterOptions::Exit:
         {
             ExitProgram();
@@ -1201,9 +1271,10 @@ void FiltersMenu() {
 	cout <<"\t [14]  Blur Image Filter\n";
 	cout <<"\t [15]  TV Noise Image Filter\n";
     cout<< "\t [16]  Purple Image Filter\n";
-	cout<< "\t [17] Infrared Radiation Filter\n";
-    cout<< "\t [18]  Oil Painting Filter\n";
-    cout<< "\t [19]  Exit\n";
+	cout<< "\t [17]  Infrared Radiation Filter\n";
+    cout<< "\t [18]  Skew Image Filter\n";
+    cout<< "\t [19]  Oil Painting Filter\n";
+    cout<< "\t [20]  Exit\n";
     cout<< "=================================\n";
     Start(GetChoice());
 }
